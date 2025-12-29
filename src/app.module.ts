@@ -4,14 +4,22 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configs } from './configs';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    // Global Config Module
     ConfigModule.forRoot({
       isGlobal: true,
       load: configs,
       envFilePath: ['.env.local', '.env'],
+    }),
+    // MongoDB
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.getOrThrow<string>('mongo.uri'),
+        dbName: configService.get<string>('mongo.dbName'),
+      }),
     }),
 
     // JWT Module
@@ -19,9 +27,9 @@ import { configs } from './configs';
       global: true,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'),
+        secret: configService.getOrThrow<string>('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.accessTokenExpiresIn'),
+          expiresIn: configService.get<string>('jwt.accessTokenExpiresIn', '15m') as any,
         },
       }),
     }),

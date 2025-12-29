@@ -2,4 +2,5 @@
 // Example: export * from './login.dto';
 // Example: export * from './register.dto';
 // Example: export * from './token.dto';
+export {};
 
