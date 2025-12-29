@@ -1,8 +1,8 @@
+
 import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -28,7 +28,6 @@ export class AuthService {
    * Register a new user with encrypted password
    */
   async register(dto: RegisterDto): Promise<IAuthResponse> {
-    // Check if user already exists
     const existingUser = await this.userModel.findOne({
       $or: [{ phone: dto.phone }, { username: dto.username }, { email: dto.email }],
     });
@@ -45,16 +44,13 @@ export class AuthService {
       }
     }
 
-    // Hash password with bcrypt
     const hashedPassword = await this.hashPassword(dto.password);
 
-    // Create user
     const user = await this.userModel.create({
       ...dto,
       password: hashedPassword,
     });
 
-    // Generate tokens
     const tokens = await this.generateTokens(user);
 
     return {
@@ -68,14 +64,14 @@ export class AuthService {
     };
   }
 
-  /**
-   * Authenticate user and return tokens
-   */
   async login(dto: LoginDto): Promise<IAuthResponse> {
-    // Find user by username or phone, include password field
     const user = await this.userModel
       .findOne({
-        $or: [{ username: dto.identifier }, { phone: dto.identifier }],
+        $or: [
+          { username: dto.identifier },
+          { phone: dto.identifier },
+          { email: dto.identifier.toLowerCase() },
+        ],
       })
       .select('+password');
 
@@ -83,7 +79,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Verify password
     const isPasswordValid = await this.comparePasswords(dto.password, user.password);
 
     if (!isPasswordValid) {
@@ -112,9 +107,7 @@ export class AuthService {
     };
   }
 
-  /**
-   * Refresh access token using refresh token
-   */
+
   async refreshTokens(refreshToken: string): Promise<IAuthTokens> {
     try {
       // Verify refresh token

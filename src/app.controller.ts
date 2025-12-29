@@ -9,13 +9,11 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get API information' })
   getAppInfo(): IAppInfo {
     return this.appService.getAppInfo();
   }
 
   @Get('health')
-  @ApiOperation({ summary: 'Health check endpoint' })
   getHealth(): IHealthCheck {
     return this.appService.getHealth();
   }

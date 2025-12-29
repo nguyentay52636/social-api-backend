@@ -1,10 +1,14 @@
-import { Injectable, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './entities/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -13,16 +17,28 @@ export class UsersService {
     private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto): Promise<UserDocument> {
     const existed = await this.userModel.findOne({
-      $or: [{ phone: dto.phone }, { username: dto.username }],
+      $or: [
+        { phone: dto.phone },
+        { username: dto.username },
+        ...(dto.email ? [{ email: dto.email }] : []),
+      ],
     });
 
     if (existed) {
-      throw new ConflictException('User already exists');
+      if (existed.username === dto.username) {
+        throw new ConflictException('Username đã tồn tại');
+      }
+      if (existed.phone === dto.phone) {
+        throw new ConflictException('Số điện thoại đã được đăng ký');
+      }
+      if (dto.email && existed.email === dto.email) {
+        throw new ConflictException('Email đã được đăng ký');
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     const user = await this.userModel.create({
       ...dto,
@@ -31,31 +47,51 @@ export class UsersService {
 
     return user;
   }
-  async  getAllUsers() { 
-   try {
-    const users =await this.userModel.find();
-    return {
-      message: 'Users fetched successfully',
-      data: users,
-      statusCode: 200,
-      date: new Date(),
-    };
-   }catch(error) {
-    throw new InternalServerErrorException(error);
-   }
+
+  async getAllUsers(): Promise<UserDocument[]> {
+    return this.userModel.find().select('-password');
   }
 
-  async updateUser(userId: string, dto: UpdateUserDto) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      dto,
-      { new: true },
-    );
+  async getUserById(userId: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(userId).select('-password');
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Không tìm thấy người dùng');
     }
 
     return user;
+  }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<UserDocument> {
+    const user = await this.userModel.findByIdAndUpdate(userId, dto, {
+      new: true,
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    return user;
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    const result = await this.userModel.findByIdAndDelete(userId);
+
+    if (!result) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+  }
+
+  async searchUsers(query: string): Promise<UserDocument[]> {
+    return this.userModel
+      .find({
+        $or: [
+          { username: { $regex: query, $options: 'i' } },
+          { email: { $regex: query, $options: 'i' } },
+          { phone: { $regex: query, $options: 'i' } },
+        ],
+      })
+      .select('-password')
+      .limit(20);
   }
 }

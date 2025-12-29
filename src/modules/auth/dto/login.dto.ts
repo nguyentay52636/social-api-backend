@@ -3,21 +3,19 @@ import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({
-    description: 'Username or phone number',
-    example: 'johndoe',
+    description: 'Email, username hoặc số điện thoại',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Username or phone is required' })
+  @IsNotEmpty({ message: 'Email, username hoặc số điện thoại là bắt buộc' })
   identifier: string;
 
   @ApiProperty({
-    description: 'User password',
-    example: 'password123',
+    description: 'Mật khẩu',
     minLength: 6,
   })
   @IsString()
-  @IsNotEmpty({ message: 'Password is required' })
-  @MinLength(6, { message: 'Password must be at least 6 characters' })
+  @IsNotEmpty({ message: 'Mật khẩu là bắt buộc' })
+  @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
 }
 
