@@ -1,38 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { configs } from './configs';
-import { MongooseModule } from '@nestjs/mongoose';
+import { configs, mongooseConfig, jwtModuleConfig } from './configs';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: configs,
-      envFilePath: ['.env.local', '.env'],
-    }),
-    // MongoDB
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.getOrThrow<string>('mongo.uri'),
-        dbName: configService.get<string>('mongo.dbName'),
-      }),
-    }),
-
-    // JWT Module
-    JwtModule.registerAsync({
-      global: true,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.getOrThrow<string>('jwt.secret'),
-        signOptions: {
-          expiresIn: configService.get<string>('jwt.accessTokenExpiresIn', '15m') as any,
-        },
-      }),
-    }),
+    ConfigModule.forRoot({ isGlobal: true, load: configs, envFilePath: ['.env.local', '.env'] }),
+    MongooseModule.forRootAsync(mongooseConfig),
+    JwtModule.registerAsync(jwtModuleConfig),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

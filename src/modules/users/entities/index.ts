@@ -1,4 +1,4 @@
 // Export all user entities from this barrel file
 // Example: export * from './user.entity';
-export {};
+export * from './user.schema';
 
