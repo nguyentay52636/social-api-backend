@@ -1,2 +1,14 @@
-// Export all interfaces from this barrel file
-export * from './jwt-payload.interface';
+// Response
+export * from './response.interface';
+
+// Auth & Token
+export * from './auth.interface';
+
+// Request
+export * from './request.interface';
+
+// Socket
+export * from './socket.interface';
+
+// App
+export * from './app.interface';

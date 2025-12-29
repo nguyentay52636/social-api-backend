@@ -1,2 +1,2 @@
-// Export all Passport strategies from this barrel file
 export * from './jwt.strategy';
+export * from './jwt-refresh.strategy';

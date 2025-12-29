@@ -1,6 +1,4 @@
-// Export all auth DTOs from this barrel file
-// Example: export * from './login.dto';
-// Example: export * from './register.dto';
-// Example: export * from './token.dto';
-export {};
-
+export * from './login.dto';
+export * from './register.dto';
+export * from './refresh-token.dto';
+export * from './change-password.dto';

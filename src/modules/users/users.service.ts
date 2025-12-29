@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './entities/user.schema';
@@ -30,6 +30,19 @@ export class UsersService {
     });
 
     return user;
+  }
+  async  getAllUsers() { 
+   try {
+    const users =await this.userModel.find();
+    return {
+      message: 'Users fetched successfully',
+      data: users,
+      statusCode: 200,
+      date: new Date(),
+    };
+   }catch(error) {
+    throw new InternalServerErrorException(error);
+   }
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
