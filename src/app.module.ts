@@ -9,6 +9,7 @@ import { configs, mongooseConfig, jwtModuleConfig } from './configs';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/users/roles/role.module';
+import { FriendRequestModule } from './modules/friends-request/friends-request.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     UsersModule,
     AuthModule,
     RolesModule,
+    FriendRequestModule,
   ],
   controllers: [AppController],
   providers: [

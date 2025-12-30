@@ -1,8 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IFriend extends Document {
-  userId: Types.ObjectId;    // người dùng hiện tại
-  friendId: Types.ObjectId;  // bạn của người đó
+  userId: Types.ObjectId;   
+  friendId: Types.ObjectId; 
   createdAt: Date;
 }
 

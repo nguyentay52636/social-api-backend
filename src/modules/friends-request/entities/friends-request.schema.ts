@@ -1,4 +1,7 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+
+export type FriendRequestDocument = FriendRequest & Document;
 
 export enum FriendRequestStatus {
   PENDING = 'pending',
@@ -6,48 +9,28 @@ export enum FriendRequestStatus {
   CANCELLED = 'cancelled',
 }
 
-export interface IFriendRequest extends Document {
+@Schema({
+  timestamps: true,
+  versionKey: false,
+})
+export class FriendRequest {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   sender: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   receiver: Types.ObjectId;
+
+  @Prop({
+    type: String,
+    enum: Object.values(FriendRequestStatus),
+    default: FriendRequestStatus.PENDING,
+  })
   status: FriendRequestStatus;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-const FriendRequestSchema = new Schema<IFriendRequest>(
-  {
-    sender: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    receiver: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: Object.values(FriendRequestStatus),
-      default: FriendRequestStatus.PENDING,
-    },
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
-);
+export const FriendRequestSchema = SchemaFactory.createForClass(FriendRequest);
 
-FriendRequestSchema.index(
-  { sender: 1, receiver: 1 },
-  { unique: true }
-);
+// Unique index: chỉ cho phép 1 request từ A -> B
+FriendRequestSchema.index({ sender: 1, receiver: 1 }, { unique: true });
 
-FriendRequestSchema.index(
-  { receiver: 1, status: 1 }
-);
-
-export const FriendRequestModel = model<IFriendRequest>(
-  'FriendRequest',
-  FriendRequestSchema
-);
+FriendRequestSchema.index({ receiver: 1, status: 1 });
