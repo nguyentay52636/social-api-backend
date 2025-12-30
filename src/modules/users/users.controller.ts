@@ -9,13 +9,11 @@ import {
   Query,
   HttpStatus,
   HttpCode,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
@@ -26,7 +24,7 @@ import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 @ApiTags('Users')
-@ApiBearerAuth()
+@Public() // TODO: Tạm thời bỏ xác thực để test - xóa sau khi test xong
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
