@@ -20,9 +20,7 @@ export class FriendRequestService {
     private readonly friendRequestModel: Model<FriendRequestDocument>,
   ) {}
 
-  /**
- không cho phép A → B nếu đã có B → A (pending)
-   */
+
   async sendFriendRequest(
     senderId: string,
     dto: CreateFriendRequestDto,

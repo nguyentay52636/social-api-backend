@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/users/roles/role.module';
 import { FriendRequestModule } from './modules/friends-request/friends-request.module';
+import { FriendsModule } from './modules/friends/friends.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
@@ -21,12 +22,11 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     AuthModule,
     RolesModule,
     FriendRequestModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    // Global JWT Guard - all routes are protected by default
-    // Use @Public() decorator to make routes public
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
