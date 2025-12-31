@@ -12,13 +12,15 @@ import {
   FriendRequestStatus,
 } from './entities/friends-request.schema';
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
+import { FriendsService } from '../friends/friends.service';
 
 @Injectable()
 export class FriendRequestService {
   constructor(
     @InjectModel(FriendRequest.name)
     private readonly friendRequestModel: Model<FriendRequestDocument>,
-  ) {}
+    private readonly friendsService: FriendsService,
+  ) { }
 
 
   async sendFriendRequest(
@@ -29,6 +31,10 @@ export class FriendRequestService {
 
     if (senderId === receiverId) {
       throw new BadRequestException('Không thể gửi lời mời kết bạn cho chính mình');
+    }
+
+    if (await this.friendsService.areFriends(senderId, receiverId)) {
+      throw new BadRequestException('Hai người đã là bạn bè');
     }
 
     const senderObjectId = new Types.ObjectId(senderId);
@@ -56,6 +62,11 @@ export class FriendRequestService {
       receiver: receiverObjectId,
       status: FriendRequestStatus.PENDING,
     });
+
+    await friendRequest.populate([
+      { path: 'sender', select: 'username avatar bio' },
+      { path: 'receiver', select: 'username avatar bio' },
+    ]);
 
     return friendRequest;
   }
@@ -87,11 +98,17 @@ export class FriendRequestService {
 
   async cancelFriendRequest(
     senderId: string,
-    requestId: string,
+    id: string,
   ): Promise<void> {
+    const senderObjectId = new Types.ObjectId(senderId);
+    const idObjectId = new Types.ObjectId(id);
+
     const request = await this.friendRequestModel.findOne({
-      _id: new Types.ObjectId(requestId),
-      sender: new Types.ObjectId(senderId),
+      $or: [
+        { _id: idObjectId },
+        { receiver: idObjectId },
+      ],
+      sender: senderObjectId,
       status: FriendRequestStatus.PENDING,
     });
 
@@ -99,8 +116,7 @@ export class FriendRequestService {
       throw new NotFoundException('Không tìm thấy lời mời kết bạn');
     }
 
-    request.status = FriendRequestStatus.CANCELLED;
-    await request.save();
+    await this.friendRequestModel.deleteOne({ _id: request._id });
   }
 
 
@@ -138,6 +154,11 @@ export class FriendRequestService {
     if (!request) {
       throw new NotFoundException('Không tìm thấy lời mời kết bạn');
     }
+
+    await this.friendsService.addFriend(
+      request.sender.toString(),
+      request.receiver.toString(),
+    );
 
     await this.friendRequestModel.deleteOne({ _id: request._id });
 

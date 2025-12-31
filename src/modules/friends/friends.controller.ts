@@ -29,7 +29,7 @@ export class FriendsController {
     status: 200,
     description: 'Lấy danh sách bạn bè thành công',
   })
-  async getFriends(@CurrentUser('_id') userId: string) {
+  async getFriends(@CurrentUser('userId') userId: string) {
     const friends = await this.friendsService.getFriends(userId);
 
     const friendsData = friends.map((f) => {
@@ -55,7 +55,7 @@ export class FriendsController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy quan hệ bạn bè' })
   async removeFriend(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Param('friendId') friendId: string,
   ) {
     await this.friendsService.removeFriend(userId, friendId);
@@ -71,7 +71,7 @@ export class FriendsController {
 //   })
 //   @ApiResponse({ status: 400, description: 'Không thể lấy bạn chung với chính mình' })
 //   async getMutualFriends(
-//     @CurrentUser('_id') userId: string,
+//     @CurrentUser('userId') userId: string,
 //     @Param('targetUserId') targetUserId: string,
 //   ) {
 //     const result = await this.friendsService.getMutualFriends(userId, targetUserId);

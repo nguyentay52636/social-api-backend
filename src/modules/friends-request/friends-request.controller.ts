@@ -24,7 +24,7 @@ import { ResponseUtil } from '../../common/utils';
 @ApiBearerAuth()
 @Controller('friend-requests')
 export class FriendRequestController {
-  constructor(private readonly friendRequestService: FriendRequestService) {}
+  constructor(private readonly friendRequestService: FriendRequestService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -36,7 +36,7 @@ export class FriendRequestController {
   @ApiResponse({ status: 400, description: 'Không thể gửi cho chính mình' })
   @ApiResponse({ status: 409, description: 'Đã có lời mời tồn tại' })
   async sendFriendRequest(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Body() dto: CreateFriendRequestDto,
   ) {
     const request = await this.friendRequestService.sendFriendRequest(
@@ -52,7 +52,7 @@ export class FriendRequestController {
     status: 200,
     description: 'Lấy danh sách lời mời đã nhận thành công',
   })
-  async getReceivedRequests(@CurrentUser('_id') userId: string) {
+  async getReceivedRequests(@CurrentUser('userId') userId: string) {
     const requests =
       await this.friendRequestService.getReceivedRequests(userId);
     return ResponseUtil.list('Lấy danh sách lời mời đã nhận thành công', requests);
@@ -64,7 +64,7 @@ export class FriendRequestController {
     status: 200,
     description: 'Lấy danh sách lời mời đã gửi thành công',
   })
-  async getSentRequests(@CurrentUser('_id') userId: string) {
+  async getSentRequests(@CurrentUser('userId') userId: string) {
     const requests = await this.friendRequestService.getSentRequests(userId);
     return ResponseUtil.list('Lấy danh sách lời mời đã gửi thành công', requests);
   }
@@ -93,7 +93,7 @@ export class FriendRequestController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lời mời' })
   async acceptFriendRequest(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Param('id') requestId: string,
   ) {
     const request = await this.friendRequestService.acceptFriendRequest(
@@ -113,7 +113,7 @@ export class FriendRequestController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lời mời' })
   async rejectFriendRequest(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Param('id') requestId: string,
   ) {
     await this.friendRequestService.rejectFriendRequest(userId, requestId);
@@ -123,14 +123,14 @@ export class FriendRequestController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Huỷ lời mời kết bạn đã gửi' })
-  @ApiParam({ name: 'id', description: 'Friend Request ID' })
+  @ApiParam({ name: 'id', description: 'Friend Request ID hoặc Receiver User ID' })
   @ApiResponse({
     status: 200,
     description: 'Huỷ lời mời thành công',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy lời mời' })
   async cancelFriendRequest(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Param('id') requestId: string,
   ) {
     await this.friendRequestService.cancelFriendRequest(userId, requestId);
