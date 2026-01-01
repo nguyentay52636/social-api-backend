@@ -1,5 +1,5 @@
 // dto/blocked-user.response.dto.ts
-import { BlockType, BlockSource } from '../entities';
+import { BlockType, BlockSource } from '@/common';
 
 export class BlockedUserResponseDto {
     id: string;

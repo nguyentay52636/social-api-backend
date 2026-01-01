@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/users/roles/role.module';
 import { FriendRequestModule } from './modules/friends-request/friends-request.module';
 import { FriendsModule } from './modules/friends/friends.module';
+import { BlocksModule } from './modules/blocks/blocks.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
@@ -23,6 +24,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     RolesModule,
     FriendRequestModule,
     FriendsModule,
+    BlocksModule,
   ],
   controllers: [AppController],
   providers: [
@@ -33,4 +35,4 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

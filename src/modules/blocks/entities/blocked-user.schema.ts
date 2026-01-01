@@ -1,17 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { BlockSource, BlockType } from '../../../common/enums/role.enum';
 
-export enum BlockType {
-  MESSAGE = 'message',
-  CALL = 'call',
-  SEARCH = 'search',
-  ALL = 'all',
-}
 
-export enum BlockSource {
-  USER = 'user',
-  REPORT = 'report',
-  SYSTEM = 'system',
-}
+
 
 export interface IBlockedUser extends Document {
   user: Types.ObjectId;
@@ -23,7 +14,7 @@ export interface IBlockedUser extends Document {
   expiresAt?: Date;
 }
 
-const BlockedUserSchema = new Schema<IBlockedUser>(
+export const BlockedUserSchema = new Schema<IBlockedUser>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -77,7 +68,7 @@ BlockedUserSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0 }
 );
-
+export type BlockedUserDocument = IBlockedUser & Document;
 export const BlockedUserModel = model<IBlockedUser>(
   'BlockedUser',
   BlockedUserSchema

@@ -22,3 +22,15 @@ export enum OnlineStatus {
   BUSY = 'busy',
 }
 
+export enum BlockType {
+  MESSAGE = 'message',
+  CALL = 'call',
+  SEARCH = 'search',
+  ALL = 'all',
+}
+
+export enum BlockSource {
+  USER = 'user',
+  REPORT = 'report',
+  SYSTEM = 'system',
+}
