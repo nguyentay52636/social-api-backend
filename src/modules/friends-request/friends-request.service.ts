@@ -97,19 +97,26 @@ export class FriendRequestService {
 
 
   async cancelFriendRequest(
-    senderId: string,
+    userId: string,
     id: string,
   ): Promise<void> {
-    const senderObjectId = new Types.ObjectId(senderId);
+    const userObjectId = new Types.ObjectId(userId);
     const idObjectId = new Types.ObjectId(id);
 
     const request = await this.friendRequestModel.findOne({
-      $or: [
-        { _id: idObjectId },
-        { receiver: idObjectId },
+      $and: [
+        { status: FriendRequestStatus.PENDING },
+        {
+          $or: [
+            {
+              _id: idObjectId,
+              $or: [{ sender: userObjectId }, { receiver: userObjectId }],
+            },
+            { sender: userObjectId, receiver: idObjectId },
+            { receiver: userObjectId, sender: idObjectId },
+          ],
+        },
       ],
-      sender: senderObjectId,
-      status: FriendRequestStatus.PENDING,
     });
 
     if (!request) {
@@ -122,11 +129,17 @@ export class FriendRequestService {
 
   async rejectFriendRequest(
     receiverId: string,
-    requestId: string,
+    id: string,
   ): Promise<void> {
+    const receiverObjectId = new Types.ObjectId(receiverId);
+    const idObjectId = new Types.ObjectId(id);
+
     const request = await this.friendRequestModel.findOne({
-      _id: new Types.ObjectId(requestId),
-      receiver: new Types.ObjectId(receiverId),
+      $or: [
+        { _id: idObjectId },
+        { sender: idObjectId },
+      ],
+      receiver: receiverObjectId,
       status: FriendRequestStatus.PENDING,
     });
 
@@ -134,8 +147,7 @@ export class FriendRequestService {
       throw new NotFoundException('Không tìm thấy lời mời kết bạn');
     }
 
-    request.status = FriendRequestStatus.REJECTED;
-    await request.save();
+    await this.friendRequestModel.deleteOne({ _id: request._id });
   }
 
   /**

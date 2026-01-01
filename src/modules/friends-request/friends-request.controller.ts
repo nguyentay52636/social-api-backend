@@ -106,7 +106,7 @@ export class FriendRequestController {
   @Post(':id/reject')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Từ chối lời mời kết bạn' })
-  @ApiParam({ name: 'id', description: 'Friend Request ID' })
+  @ApiParam({ name: 'id', description: 'Friend Request ID hoặc Sender User ID' })
   @ApiResponse({
     status: 200,
     description: 'Từ chối lời mời thành công',
