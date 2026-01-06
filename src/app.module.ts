@@ -13,6 +13,7 @@ import { FriendRequestModule } from './modules/friends-request/friends-request.m
 import { FriendsModule } from './modules/friends/friends.module';
 import { BlocksModule } from './modules/blocks/blocks.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { PostsModule } from './modules/posts/post.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     FriendRequestModule,
     FriendsModule,
     BlocksModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [
