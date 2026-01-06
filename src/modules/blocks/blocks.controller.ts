@@ -84,6 +84,19 @@ export class BlocksController {
         return ResponseUtil.list('Lấy danh sách chặn thành công', blocks);
     }
 
+    @Get('list/:userId')
+    @ApiOperation({ summary: 'Lấy danh sách chặn theo userId' })
+    @ApiParam({ name: 'userId', description: 'ID của người dùng cần lấy danh sách chặn' })
+    @ApiResponse({
+        status: 200,
+        description: 'Lấy danh sách thành công',
+        type: [BlockedUserResponseDto],
+    })
+    async getBlockedUsersByUserId(@Param('userId') userId: string) {
+        const blocks = await this.blocksService.getBlockedUsers(userId);
+        return ResponseUtil.list('Lấy danh sách chặn thành công', blocks);
+    }
+
     @Get(':userId/status')
     @ApiOperation({ summary: 'Kiểm tra trạng thái chặn với người dùng khác' })
     @ApiParam({ name: 'userId', description: 'ID của người dùng cần kiểm tra' })

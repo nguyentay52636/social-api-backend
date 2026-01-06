@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { IBlockedUser } from './entities/blocked-user.schema';
-import { BlockUserDto, UnblockUserDto, BlockStatusResponseDto } from './dto/blocked-user.dto';
+import { BlockUserDto, BlockStatusResponseDto } from './dto/blocked-user.dto';
 import { BlockType, BlockSource } from '@/common';
 
 @Injectable()

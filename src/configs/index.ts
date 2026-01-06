@@ -1,6 +1,6 @@
 import appConfig from './app.config';
 import jwtConfig from './jwt.config';
-import mongoConfig from './monggo.config';
+import mongoConfig from './mongoose.config';
 
 export { appConfig, jwtConfig, mongoConfig };
 export { mongooseConfig } from './database.config';
