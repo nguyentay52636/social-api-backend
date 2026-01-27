@@ -3,6 +3,7 @@ import {
     NotFoundException,
     ForbiddenException,
     BadRequestException,
+    Inject,
   } from '@nestjs/common';
   import { InjectModel } from '@nestjs/mongoose';
   import { Model, Types } from 'mongoose';
@@ -11,10 +12,13 @@ import {
   import { CreatePostDto } from './dtos/create-post.dto';
   import { UpdatePostDto } from './dtos/update-post.dto';
   import { FriendsService } from '../friends/friends.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
   
   @Injectable()
   export class PostsService {
     constructor(
+      @Inject(CACHE_MANAGER) private cacheManager: Cache,
       @InjectModel(Post.name)
       private readonly postModel: Model<PostDocument>,
       @InjectModel(Like.name)
@@ -22,9 +26,7 @@ import {
       private readonly friendsService: FriendsService,
     ) {}
   
-    /**
-     * Tạo bài viết mới
-     */
+
     async createPost(userId: string, dto: CreatePostDto): Promise<PostDocument> {
       const post = await this.postModel.create({
         author: new Types.ObjectId(userId),
@@ -41,12 +43,27 @@ import {
       userId: string,
       page = 1,
       limit = 10,
-    ): Promise<{ posts: any[]; total: number; page: number; limit: number; hasNext: boolean }> {
+    ): Promise<{
+      posts: any[];
+      total: number;
+      page: number;
+      limit: number;
+      hasNext: boolean;
+    }> {
+      const cacheKey = `feed:${userId}:page:${page}:limit:${limit}`;
+    
+      const cached = await this.cacheManager.get(cacheKey);
+      if (cached) {
+        console.log('⚡ Feed from Redis');
+        return cached as any;
+      }
+    
       const skip = (page - 1) * limit;
       const friendIds = await this.getFriendIds(userId);
+    
       const friendObjectIds = friendIds.map((id) => new Types.ObjectId(id));
       const userObjectId = new Types.ObjectId(userId);
-  
+    
       const query = {
         isActive: true,
         $or: [
@@ -58,7 +75,7 @@ import {
           { author: userObjectId },
         ],
       };
-  
+    
       const [posts, total] = await Promise.all([
         this.postModel
           .find(query)
@@ -69,7 +86,7 @@ import {
           .lean(),
         this.postModel.countDocuments(query),
       ]);
-  
+    
       const postsWithStats = await Promise.all(
         posts.map(async (post) => {
           const [likesCount, commentsCount, isLiked] = await Promise.all([
@@ -80,7 +97,7 @@ import {
               user: userObjectId,
             }),
           ]);
-  
+    
           return {
             ...post,
             likesCount,
@@ -89,15 +106,20 @@ import {
           };
         }),
       );
-  
-      return {
+    
+      const result = {
         posts: postsWithStats,
         total,
         page,
         limit,
         hasNext: skip + limit < total,
       };
+    
+      await this.cacheManager.set(cacheKey, result, 30);
+    
+      return result;
     }
+    
   
    
     async getUserPosts(

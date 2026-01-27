@@ -15,12 +15,33 @@ import { BlocksModule } from './modules/blocks/blocks.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { PostsModule } from './modules/posts/post.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { redisCacheConfig } from './configs/redis.config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: configs, envFilePath: ['.env.local', '.env'] }),
     MongooseModule.forRootAsync(mongooseConfig),
     JwtModule.registerAsync(jwtModuleConfig),
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000,   
+        limit: 3,    
+      },
+      {
+        name: 'medium',
+        ttl: 10000,  
+        limit: 20,   
+      },
+      {
+        name: 'long',
+        ttl: 60000,  
+        limit: 100,  
+      },
+    ]),
+    CacheModule.registerAsync(redisCacheConfig),
     UsersModule,
     AuthModule,
     RolesModule,
@@ -36,6 +57,10 @@ import { ChatModule } from './modules/chat/chat.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

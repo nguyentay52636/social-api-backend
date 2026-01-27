@@ -17,5 +17,5 @@ import { FriendsModule } from '../friends/friends.module';
   controllers: [PostsController],
   providers: [PostsService],
   exports: [PostsService],
-})
+}) 
 export class PostsModule {}
