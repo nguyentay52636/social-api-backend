@@ -14,6 +14,7 @@ import { FriendsModule } from './modules/friends/friends.module';
 import { BlocksModule } from './modules/blocks/blocks.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { PostsModule } from './modules/posts/post.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PostsModule } from './modules/posts/post.module';
     FriendsModule,
     BlocksModule,
     PostsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

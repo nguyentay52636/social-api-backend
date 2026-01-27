@@ -15,7 +15,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-  ) {}
+  ) { }
 
   async createUser(dto: CreateUserDto): Promise<UserDocument> {
     const existed = await this.userModel.findOne({
@@ -82,16 +82,24 @@ export class UsersService {
     }
   }
 
-  async searchUsers(query: string): Promise<UserDocument[]> {
+  async searchUsers(keyword: string) {
+    if (!keyword) return [];
+
+    const isPhone = /^[0-9]{8,15}$/.test(keyword);
+
+    const query = isPhone
+      ? { phone: keyword }
+      : {
+        username: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      };
+
     return this.userModel
-      .find({
-        $or: [
-          { username: { $regex: query, $options: 'i' } },
-          { email: { $regex: query, $options: 'i' } },
-          { phone: { $regex: query, $options: 'i' } },
-        ],
-      })
+      .find(query)
       .select('-password')
-      .limit(20);
+      .limit(20)
+      .exec();
   }
 }
